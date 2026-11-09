@@ -29,12 +29,12 @@ This package is **week 1 (M0–M2)**.
 
 ## Layout
 ```
-AI-Agent-Tutorial/
+agent-tutorial/
   README.md          this file
   missions/          M0.md, M1.md, M2.md  (go in order)
   tools/             check_env.py, make_messy_folder.py, check_mission.py
 ```
-Put it at `~/AI-Agent-Tutorial`. Create all work **only inside `~/agent-lab/`**.
+Put it at `~/agent-tutorial`. Create all work **only inside `~/agent-lab/`**.
 
 ## How to proceed
 1. Do M0 → M1 → M2 in order, following `missions/`.
