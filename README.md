@@ -44,7 +44,7 @@ Put it at `~/agent-tutorial`. Create all work **only inside `~/agent-lab/`**.
 ## How to submit (one GitHub repo per student)
 Each student uses **their own GitHub repo** for all missions.
 
-1. Once (in M0): create a **private** GitHub repo `agent-tutorial-<student number>` and invite the instructor account **`BongHwi`** as a collaborator (repo Settings → Collaborators → Add people).
+1. Once (in M0): sign in to GitHub from your terminal. Easiest: install the GitHub CLI and run `gh auth login` (GitHub.com → HTTPS → web browser). Without it `git clone`/`git push` of a private repo asks for a password and **your GitHub password does not work**; the alternative is a Personal Access Token with scope `repo`. Then create a **private** GitHub repo `agent-tutorial-<student number>` with **"Add a README file" ticked** (so it is not empty) and invite the instructor account **`BongHwi`** as a collaborator (repo Settings → Collaborators → Add people).
    ```bash
    cd ~/agent-lab
    git clone https://github.com/<your GitHub ID>/agent-tutorial-<student number>.git submission
@@ -58,7 +58,7 @@ Each student uses **their own GitHub repo** for all missions.
    ```
 4. The last commit before the deadline is graded. History is also read, so never rewrite it (no force push).
 
-Grading = **verification tool passes + observation notes**. 5–10 lines of notes are enough, but they must be concrete: what the agent did, what you corrected.
+Grading = **verification tool passes + observation notes**. If you cannot reach PASS, submit anyway: the checker output, `git log` and notes on what went wrong still count; a missing submission counts for nothing. 5–10 lines of notes are enough, but they must be concrete: what the agent did, what you corrected.
 Create a GitHub account in M0 if you have none, and never upload personal data or keys.
 
 ## Safety rules (must follow)
@@ -66,6 +66,6 @@ Create a GitHub account in M0 if you have none, and never upload personal data o
 2. Start Codex with `--cd <folder> --sandbox workspace-write`. Do not use options such as `--dangerously-bypass-approvals-and-sandbox`.
 3. Before any task, `git init` + commit so you can restore the starting state.
 4. Read and understand a command before approving it. If you don't understand, don't approve; ask for an explanation.
-5. No deletion (`rm`, overwriting). Move things into e.g. `_duplicates/` instead.
+5. The **agent** must never delete or overwrite your data files; it moves them into e.g. `_duplicates/` instead. You may reset a mission folder yourself, only with the exact commands given in a mission's "If you are stuck".
 6. Never put passwords, API keys or personal data in prompts or files.
 7. When the agent says "done", check with the verification tool and `git status` yourself.

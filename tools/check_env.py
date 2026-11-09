@@ -32,7 +32,7 @@ def main():
     rows.append(("codex", "PASS" if out else "FAIL", out or "not found", "" if out else "install Codex (see M0) / Codex をインストール (M0参照)"))
     if out:
         login = run(["codex", "login", "status"])
-        rows.append(("codex login", "PASS" if login else "WARN", login or "not logged in?",
+        rows.append(("codex login", "PASS" if login else "FAIL", login or "not logged in?",
                      "" if login else "run `codex login` / `codex login` を実行"))
 
     out = run(["node", "--version"])

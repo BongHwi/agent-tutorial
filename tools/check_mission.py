@@ -75,16 +75,17 @@ def check_moves(root, expected, actual):
     detail = "missing / なし"
     if moves.is_file():
         try:
-            with moves.open(newline="", encoding="utf-8") as f:
+            with moves.open(newline="", encoding="utf-8-sig") as f:
                 rd = csv.DictReader(f)
                 if rd.fieldnames != ["old", "new"]:
                     detail = f"header must be old,new (got {rd.fieldnames})"
                 else:
                     orig = {e.orig for e in expected}
                     rows = list(rd)
-                    valid = sum(1 for r in rows if r["old"] in orig and r["new"] in actual)
+                    norm = lambda s: (s or "").removeprefix("./")
+                    valid = sum(1 for r in rows if norm(r["old"]) in orig and norm(r["new"]) in actual)
                     rows_ok = valid >= THRESHOLD * len(orig)
-                    detail = f"{valid}/{len(orig)} valid rows"
+                    detail = f"{valid}/{len(orig)} valid rows (old = original relative path, new = current relative path; no absolute paths)"
         except (OSError, UnicodeDecodeError, csv.Error) as exc:
             detail = f"unreadable: {exc}"
     out.append(("moves.csv", rows_ok, detail))
@@ -119,7 +120,17 @@ def main(argv):
 
     checks = []
     n_exp = len(expected)
-    checks.append(("file count / ファイル数", len(actual) == n_exp, f"{len(actual)}/{n_exp}"))
+    detail = f"{len(actual)}/{n_exp}"
+    if len(actual) > n_exp and mission == "m2":
+        extra = sorted(p for p in actual if not any(p.endswith(e.orig.split("/")[-1]) for e in expected))
+        if extra:
+            detail += f" (unexpected files / 予期しないファイル: {', '.join(extra[:5])})"
+    elif len(actual) > n_exp:
+        known = {e.target.split("/")[-1].lower() for e in expected} | {e.orig.lower() for e in expected}
+        extra = sorted(p for p in actual if p.split("/")[-1].lower() not in known)
+        if extra:
+            detail += f" (unexpected files / 予期しないファイル: {', '.join(extra[:5])})"
+    checks.append(("file count / ファイル数", len(actual) == n_exp, detail))
     same = Counter(actual.values()) == Counter(hashlib.sha256(e.data).hexdigest() for e in expected)
     checks.append(("content intact / 内容保持", same,
                    "OK" if same else "a file was lost, modified or added / ファイルの欠落・変更・追加があります"))
