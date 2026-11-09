@@ -1,6 +1,8 @@
-# AI Agent Practice for Research (with Codex and DeepSeek Harness)
+# AI Agents for Research: A Hands-on Tutorial
 
-A self-paced, remote, 4-week hands-on course for physics students: delegating work to AI coding agents, checking their results, and building reusable tools and skills for research.
+Hands-on course on delegating work to AI coding agents (Codex, DeepSeek Harness), checking their results, and building reusable tools and skills for research.
+
+A self-paced, remote, 4-week course for physics students.
 The goal is not "how to make AI write code" but **how to use AI as a research/development partner that you design, manage and verify**.
 
 **Language:** the course text is English. Prompts are given in English and Japanese; you may write or adapt your own prompts in Japanese (or English). Observations in your submission can also be in Japanese. Keep the rules explicit (file-name format, "dry-run", "wait for my approval") whichever language you use.
