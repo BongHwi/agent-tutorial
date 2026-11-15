@@ -23,18 +23,19 @@ The goal is not "how to make AI write code" but **how to use AI as a research/de
 | Week | Content | Missions |
 |---|---|---|
 | 1 | File missions: environment, renaming, restructuring with undo | M0, M1, M2 |
-| 2 | Permission experiment, working via scripts, DeepSeek Harness (DSH) | M3, M4, M5 |
+| 2 | Permission experiment, turning the cleanup into a reusable tool, DeepSeek Harness (DSH) | M3, M4, M5 |
 | 3 | Detector timing analysis: delegate analysis and verify it | M6, M7, M8 |
 | 4 | Writing Skills: turn your way of working into a reusable Skill | M9, M10, M11 |
 
-This package is **week 1 (M0–M2)**.
+This package covers **week 1 (M0–M2)** and **week 2 (M3–M5)**.
 
 ## Layout
 ```
 agent-tutorial/
   README.md          this file
-  missions/          M0.md, M1.md, M2.md  (go in order)
-  tools/             check_env.py, make_messy_folder.py, check_mission.py
+  missions/          M0.md ... M5.md  (go in order)
+  tools/             check_env.py, make_messy_folder.py, check_mission.py,
+                     setup_m3.py, check_m4.py
 ```
 Put it at `~/agent-tutorial`. Create all work **only inside `~/agent-lab/`**.
 
@@ -71,3 +72,4 @@ Create a GitHub account in M0 if you have none, and never upload personal data o
 5. The **agent** must never delete or overwrite your data files; it moves them into e.g. `_duplicates/` instead. You may reset a mission folder yourself, only with the exact commands given in a mission's "If you are stuck".
 6. Never put passwords, API keys or personal data in prompts or files.
 7. When the agent says "done", check with the verification tool and `git status` yourself.
+8. DeepSeek Harness (week 2): start it from inside the work folder with `DSH_PERMISSION_MODE=workspace-write`, and keep API keys only in environment variables, never in files you commit.

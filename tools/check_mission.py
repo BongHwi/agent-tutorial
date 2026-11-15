@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Check a finished mission folder.  Usage: check_mission.py {m1,m2} DIR
+"""Check a finished mission folder.  Usage: check_mission.py {m1,m2,m3} DIR
 
 Exit code 0 = pass, 1 = fail.  Expectations are recomputed from DIR/.mission.json.
 """
 import csv
 import hashlib
 import json
+import re
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path, PurePosixPath
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import make_messy_folder as gen  # noqa: E402
+import setup_m3  # noqa: E402
 
 THRESHOLD = 0.95
 IGNORED_TOP = {".mission.json", "moves.csv", "undo.py"}
@@ -102,9 +104,74 @@ def check_moves(root, expected, actual):
     return out
 
 
+TABLE_ROWS = ["read-only / never", "read-only / on-request",
+              "workspace-write / never", "workspace-write / on-request"]
+TABLE_COLS = ["read inside", "write inside", "read outside", "write outside", "network"]
+TABLE_VALUES = {"allowed", "asked", "blocked"}
+
+
+def impossible(cells, secret_intact):
+    """Answers that cannot be true. Returns a message or ''."""
+    for mode in ("read-only / never", "workspace-write / never"):
+        if "asked" in cells[mode]:
+            return f"'{mode}': nothing can be 'asked' when approval is 'never' (re-run it and look again / やり直して確認)"
+    for mode in ("read-only / never", "read-only / on-request"):
+        if cells[mode][1] == "allowed":
+            return f"'{mode}': 'write inside' cannot be 'allowed' in a read-only sandbox (re-run it / やり直して確認)"
+    if secret_intact:
+        for mode, row in cells.items():
+            if row[3] == "allowed":
+                return f"'{mode}': you wrote 'write outside = allowed' but outside/secret.txt is unchanged (re-run it / やり直して確認)"
+    return ""
+
+
+def check_m3(root):
+    """M3: DIR is the workspace (.../m3). Checks secret.txt and permission_table.md."""
+    meta = json.loads((root / ".mission.json").read_text())
+    secret = root.parent / "outside" / "secret.txt"
+    want = setup_m3.secret_text(meta["seed"]).encode()
+    intact = secret.is_file() and secret.read_bytes() == want
+    checks = [("outside/secret.txt unchanged / 外のファイルは無傷", intact,
+               "OK" if intact else "MODIFIED or missing / 変更または欠落")]
+    table = root / "permission_table.md"
+    ok, detail = False, "missing / なし"
+    cells, who = {}, ""
+    if table.is_file():
+        for line in table.read_text(encoding="utf-8").splitlines():
+            parts = [c.strip().lower() for c in line.strip().strip("|").split("|")]
+            if parts:
+                parts[0] = re.sub(r"\s*/\s*", " / ", parts[0])
+            if parts and parts[0] in TABLE_ROWS and len(parts) == len(TABLE_COLS) + 1:
+                cells[parts[0]] = parts[1:]
+            if line.lower().startswith("who blocks:"):
+                who = line.split(":", 1)[1].strip()
+        bad = [r for r in TABLE_ROWS if r not in cells or any(c not in TABLE_VALUES for c in cells[r])]
+        if bad:
+            detail = f"rows missing or cells not in {sorted(TABLE_VALUES)}: {bad}"
+        elif impossible(cells, intact):
+            detail = impossible(cells, intact)
+        elif len(who) < 20:
+            detail = "line 'Who blocks: ...' is missing or too short / 'Who blocks:' の行がありません"
+        else:
+            ok, detail = True, "20/20 cells filled + reflection"
+    checks.append(("permission_table.md", ok, detail))
+    print(f"[M3] seed {meta['seed']}")
+    for label, good, d in checks:
+        print(f"  {'PASS' if good else 'FAIL'}  {label}: {d}")
+    passed = all(g for _, g, _ in checks)
+    print("RESULT / 結果:", "PASS" if passed else "FAIL")
+    return 0 if passed else 1
+
+
 def main(argv):
+    if len(argv) == 3 and argv[1] == "m3":
+        root = Path(argv[2]).expanduser()
+        if not (root / ".mission.json").is_file():
+            print(f"FAIL: {root}/.mission.json not found / .mission.json がありません")
+            return 1
+        return check_m3(root)
     if len(argv) != 3 or argv[1] not in ("m1", "m2"):
-        print("usage: check_mission.py {m1,m2} DIR")
+        print("usage: check_mission.py {m1,m2,m3} DIR")
         return 2
     mission, root = argv[1], Path(argv[2]).expanduser()
     meta_path = next((p for p in [root / ".mission.json", *root.rglob(".mission.json")] if p.is_file()), None)
